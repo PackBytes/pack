@@ -67,7 +67,7 @@ const types = {
 	},
 	array: {
 		encode: (buf, schema, data = []) => {
-			if (!schema._size) writeVarInt(buf, data.length);
+			if (!schema.length) writeVarInt(buf, data.length);
 			if (schema.packSizeBits) {
 				data.forEach((d, i) => {
 					pack <<= schema.packSizeBits;
@@ -81,7 +81,7 @@ const types = {
 			} else for (const d of data) encodeSchema(buf, schema.val, d);
 		},
 		decode: (buf, schema) => {
-			const arr = [], length = schema._size || readVarInt(buf);
+			const arr = [], length = schema.length || readVarInt(buf);
 			if (schema.packSizeBits) {
 				var pack;
 				for (let i = 0; i < length; i++) {
@@ -377,8 +377,8 @@ const defaultDate = new Date(0);
 const defaultLonlat = [ 0, 0 ];
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
-const genType = (_type) => {
-	const fn = val => ({ _type, val, size: function(s) { this._size = s; return this; } });
+const genType = _type => {
+	const fn = (val, length) => ({ _type, val, length });
 	fn.toJSON = () => ({ _type });
 	fn._type = _type;
 	return fn;

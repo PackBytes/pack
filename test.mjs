@@ -27,7 +27,7 @@ tests.push({
 });
 tests.push(
 	...tests.map(t => ({ schema: array(t.schema), data: [ t.data, t.data ] })),
-	...tests.map(t => ({ schema: array(t.schema).size(3), data: [ t.data, t.data, t.data ] }))
+	...tests.map(t => ({ schema: array(t.schema, 3), data: [ t.data, t.data, t.data ] }))
 );
 tests.push({
 	schema: tests.reduce((obj, t, i) => (obj[i] = t.schema, obj), {}),
