@@ -7,8 +7,7 @@ const data = Array.from({ length: 32 }).map((x, i) => i);
 const tests = [
 	{ schema: bool, data: true },
 	{ schema: bool, data: false },
-	{ schema: bits(1), data: 0 },
-	{ schema: bits(1), data: 1 },
+	...Array.from({ length: 32 }).map((x, i) => ({ schema: bits(i + 1), data: 2**(i + 1) - 1 })),
 	{ schema: bits(8), data: 255 },
 	{ schema: bits(32), data: 4294967295 },
 	{ schema: string, data: 'str' },

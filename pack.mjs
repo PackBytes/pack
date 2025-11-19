@@ -302,10 +302,10 @@ const packInts = (o, sort) => { // efficiently packs bits(1-32) fields into 32 /
 			pack.forEach(int => {
 				if (int.schema.bits <= remaining16) {
 					remaining16 -= int.schema.bits;
-					ints16.push(p);
+					ints16.push(int);
 				} else if (int.schema.bits <= remaining8) {
 					remaining8 -= int.schema.bits;
-					ints8.push(p);
+					ints8.push(int);
 				} else fail = true;
 			});
 			if (fail) o.int32.push(pack);
