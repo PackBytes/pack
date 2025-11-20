@@ -1,3 +1,11 @@
+# PackBytes
+
+- Binary data encoder for JavaScript
+- Creates the smallest possible encoding for a given Schema
+- Send compact data to web browser clients
+
+# API
+
 ```javascript
 import { bool, bits, float, varint, string, blob, date, array, selectOne, selectMany, PackBytes } from './pack.mjs';
 
@@ -13,7 +21,7 @@ type = date // 32 bit javascript Date, 1 second accuracy with year range 1884 to
 type = array(type) // array of any type
 type = array(type, length) // specific length array
 type = { field1: type, field2: type, .. } // object with all fields
-type = selectOne({ field1: type, field2: type, .. }) // object with a single field active
+type = selectOne({ field1: type, field2: type, .. }) // object with a single active field
 type = selectMany({ field1: type, field2: type, .. }) // object with multiple optional fields
 type = null // takes up no space
 
