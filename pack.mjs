@@ -160,17 +160,17 @@ const types = {
 			for (const f in schema.val) if (data[f] !== undefined) encodeSchema(schema.val[f], buf, data[f]);
 		},
 		decode: (schema, buf) => {
-			const obj = {};
-			const total = schema.map.index.length;
-			var i = 0;
-			while (i < total) {
-				var int = Math.min(32, total - i);
-				var field_bits = readUint(buf, bitsToBytes(int));
-				while (int > 0) {
-					if (field_bits & 1) obj[schema.map.index[i]] = decodeSchema(schema.val[schema.map.index[i]], buf);
-					field_bits >>>= 1;
-					int--;
-					i++;
+			const obj = {}, field_count = schema.map.index.length;
+			var field_index = 0;
+			while (field_index < field_count) {
+				const fields_in_group = Math.min(32, field_count - field_index); // process up to 32 fields per group
+				const bit_field = readUint(buf, bitsToBytes(fields_in_group));
+				for (let index_in_group = 0; index_in_group < fields_in_group; index_in_group++) {
+					if (bit_field & 1<<index_in_group) { // active field
+						const f = schema.map.index[field_index];
+						obj[f] = decodeSchema(schema.val[f], buf);
+					}
+					field_index++;
 				}
 			}
 			return obj;
