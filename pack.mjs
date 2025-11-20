@@ -7,7 +7,7 @@ export const PackBytes = (schema, bufferSize = 4096) => {
 			encodeSchema(buf, schema, data);
 			return new Uint8Array(buf.encodeAB, 0, buf.offset);
 		},
-		decode: buffer => decodeSchema(decodeBuffer(buffer), schema),
+		decode: buffer => decodeSchema(setDecodeBuffer(buffer), schema),
 	};
 };
 
@@ -198,7 +198,7 @@ const setEncodeBuffer = (arrayBuffer, buf = {}) => {
 	buf.encodeUA = new Uint8Array(arrayBuffer);
 	return buf;
 };
-const decodeBuffer = b => ({ // b = Buffer, TypedArray, or ArrayBuffer
+const setDecodeBuffer = b => ({ // b = Buffer, TypedArray, or ArrayBuffer
 	decodeDV: b.buffer ? new DataView(b.buffer, b.byteOffset, b.byteLength) : new DataView(b),
 	decodeUA: b.buffer ? new Uint8Array(b.buffer, b.byteOffset, b.byteLength) : new Uint8Array(b),
 	offset: 0,
