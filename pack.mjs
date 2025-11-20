@@ -147,16 +147,16 @@ const types = {
 	},
 	selectMany: {
 		encode: (schema, buf, data) => {
-			let field_bits = 0, field_count = 0;
+			let bit_field = 0, field_index = 0;
 			for (const f in schema.val) {
-				if (field_count == 32) { // max 32 fields per u32
-					writeUint(buf, field_bits, 4);
-					field_bits = field_count = 0;
+				if (field_index == 32) { // max 32 fields per u32
+					writeUint(buf, bit_field, 4);
+					bit_field = field_index = 0;
 				}
-				if (data[f] !== undefined) field_bits += 1<<field_count; // active field
-				field_count += 1;
+				if (data[f] !== undefined) bit_field += 1<<field_index; // active field
+				field_index += 1;
 			}
-			writeUint(buf, field_bits, bitsToBytes(field_count));
+			writeUint(buf, bit_field, bitsToBytes(field_index));
 			for (const f in schema.val) if (data[f] !== undefined) encodeSchema(schema.val[f], buf, data[f]);
 		},
 		decode: (schema, buf) => {
