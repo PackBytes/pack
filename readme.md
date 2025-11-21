@@ -14,7 +14,6 @@ type = bits(x) // x number of bits 1-32 for unsigned integer, max int = 2**x - 1
 type = float(x) // 16, 32, or 64 bit floating point number
 type = varint // variable length integer, max int = 1_073_741_823
 type = string // string of any length
-type = string([ 'str1', 'str2', .. ]) // any of specific strings
 type = blob // any length buffer
 type = blob(x) // specific byte size buffer 
 type = date // 32 bit javascript Date, 1 second accuracy with year range 1884 to 2106

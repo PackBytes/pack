@@ -42,20 +42,8 @@ const types = {
 		decode: (schema, buf) => readVarInt(buf),
 	},
 	string: {
-		encode: (schema, buf, data = '') => {
-			if (schema.map) {
-				const int = schema.map.values[data] || 0;
-				writeUint(buf, int, schema.map.bytes) 
-			} else writeString(buf, data);
-		},
-		decode: (schema, buf) => schema.map ? schema.map.index[readUint(buf, schema.map.bytes)] : readString(buf),
-		init: schema => {
-			if (schema.val) {
-				if (schema.val[0] != '') schema.val.unshift('');
-				schema.map = genMap(schema.val);
-				schema.bits = schema.map.bits;
-			}
-		},
+		encode: (schema, buf, data = '') => writeString(buf, data),
+		decode: (schema, buf) => readString(buf),
 	},
 	blob: {
 		encode: (schema, buf, data = defaultBlob) => writeBlob(buf, data, schema.val),
