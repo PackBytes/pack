@@ -1,4 +1,4 @@
-import { bool, bits, string, array, float, blob, selectOne, selectMany, PackBytes } from './pack.mjs';
+import { bool, bits, varint, string, array, float, blob, selectOne, selectMany, PackBytes } from './pack.mjs';
 export const logs = [];
 const log = (...msg) => console.log(...msg) || logs.push(msg);
 
@@ -36,6 +36,7 @@ tests.push({
 	schema: selectMany({ s1: bool, s2: tests.slice(-1)[0].schema }),
 	data: { s2: tests.slice(-1)[0].data }
 });
+for (let x = 1; x <= 1_073_741_823; x*=2) tests.push({ schema: varint, data: x });
 
 // run tests
 let fail;
@@ -51,6 +52,7 @@ tests.forEach((t, i) => {
 		var buf = encode(t.data);
 		log('buf:', buf);
 		var result = decode(buf);
+		log('result:', JSON.stringify(result));
 	} catch (e) {
 		log('');
 		log('FAIL:');

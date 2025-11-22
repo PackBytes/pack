@@ -194,48 +194,48 @@ const setDecodeBuffer = b => ({ // b = Buffer, TypedArray, or ArrayBuffer
 
 const writeUint = (buf, val, bytes) => {
 	checkSize(buf, bytes);
-	bytes == 1 ? buf.encodeDV.setUint8(buf.offset, val) :
-	bytes == 2 ? buf.encodeDV.setUint16(buf.offset, val) :
-		buf.encodeDV.setUint32(buf.offset, val);
+	bytes == 1 ? buf.encodeDV.setUint8(buf.offset, val, true) :
+	bytes == 2 ? buf.encodeDV.setUint16(buf.offset, val, true) :
+		buf.encodeDV.setUint32(buf.offset, val, true);
 	buf.offset += bytes;
 };
 const readUint = (buf, bytes) => {
 	const int =
-		bytes == 1 ? buf.decodeDV.getUint8(buf.offset) :
-		bytes == 2 ? buf.decodeDV.getUint16(buf.offset) :
-			buf.decodeDV.getUint32(buf.offset);
+		bytes == 1 ? buf.decodeDV.getUint8(buf.offset, true) :
+		bytes == 2 ? buf.decodeDV.getUint16(buf.offset, true) :
+			buf.decodeDV.getUint32(buf.offset, true);
 	buf.offset += bytes;
 	return int;
 };
 const writeFloat = (buf, val, bytes) => {
 	checkSize(buf, bytes);
-	bytes == 2 ? buf.encodeDV.setFloat16(buf.offset, val) :
-	bytes == 4 ? buf.encodeDV.setFloat32(buf.offset, val) :
-		buf.encodeDV.setFloat64(buf.offset, val);
+	bytes == 2 ? buf.encodeDV.setFloat16(buf.offset, val, true) :
+	bytes == 4 ? buf.encodeDV.setFloat32(buf.offset, val, true) :
+		buf.encodeDV.setFloat64(buf.offset, val, true);
 	buf.offset += bytes;
 };
 const readFloat = (buf, bytes) => {
 	const float =
-		bytes == 2 ? buf.decodeDV.getFloat16(buf.offset) :
-		bytes == 4 ? buf.decodeDV.getFloat32(buf.offset) :
-			buf.decodeDV.getFloat64(buf.offset);
+		bytes == 2 ? buf.decodeDV.getFloat16(buf.offset, true) :
+		bytes == 4 ? buf.decodeDV.getFloat32(buf.offset, true) :
+			buf.decodeDV.getFloat64(buf.offset, true);
 	buf.offset += bytes;
 	return float;
 };
 const writeVarInt = (buf, int) => {
 	if (int < 0) return writeUint(buf, 0, 1);
 	if (int <= 127) return writeUint(buf, int, 1);
-	if (int <= 16_383) return writeUint(buf, ((int & 0b11_1111_1000_0000) << 1) | (int & 0b111_1111) | 0b1000_0000_0000_0000, 2);
-	if (int <= 1_073_741_823) return writeUint(buf, ((int & 0b11_1111_1000_0000_0000_0000_0000_0000) << 1) | (int & 0b111_1111_1111_1111_1111_1111) | 0b1000_0000_1000_0000_0000_0000_0000_0000, 4);
-	throw RangeError(`varInt max 1,073,741,823 exceeded: "${int}"`);
+	if (int <= 16_383) return writeUint(buf, (0b1000_0000 | (int & 0b111_1111) | (int & 0b11_1111_1000_0000) << 1), 2);
+	if (int <= 1_073_741_823) return writeUint(buf, (0b1000_0000_1000_0000 | (int & 0b111_1111) | (int & 0b11_1111_1000_0000) << 1 | (int & 0b11_1111_1111_1111_1100_0000_0000_0000) << 2), 4);
+	throw RangeError(`varInt max 1_073_741_823 exceeded: "${int}"`);
 };
 const readVarInt = buf => {
 	let val = readUint(buf, 1);
 	if (val < 128) return val;
 	buf.offset--; val = readUint(buf, 2);
-	if (!(val & 0b1000_0000)) return ((val & 0b111_1111_0000_0000) >> 1) | (val & 0b111_1111);
+	if (!(val & 0b1000_0000_0000_0000)) return (val & 0b111_1111) | (val & 0b111_1111_0000_0000) >> 1;
 	buf.offset -= 2; val = readUint(buf, 4);
-	return ((val & 0b111_1111_0000_0000_0000_0000_0000_0000) >> 1) | (val & 0b111_1111_1111_1111_1111_1111);
+	return (val & 0b111_1111) | (val & 0b111_1111_0000_0000) >> 1 | (val & 0b1111_1111_1111_1111_0000_0000_0000_0000) >>> 2;
 };
 const writeString = (buf, str) => {
 	const uint8array = textEncoder.encode(str);
