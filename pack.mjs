@@ -223,19 +223,16 @@ const readFloat = (buf, bytes) => {
 	return float;
 };
 const writeVarInt = (buf, int) => {
-	if (int < 0) return writeUint(buf, 0, 1);
-	if (int <= 127) return writeUint(buf, int, 1);
-	if (int <= 16_383) return writeUint(buf, (0b1000_0000 | (int & 0b111_1111) | (int & 0b11_1111_1000_0000) << 1), 2);
-	if (int <= 1_073_741_823) return writeUint(buf, (0b1000_0000_1000_0000 | (int & 0b111_1111) | (int & 0b11_1111_1000_0000) << 1 | (int & 0b11_1111_1111_1111_1100_0000_0000_0000) << 2), 4);
-	throw RangeError(`varInt max 1_073_741_823 exceeded: "${int}"`);
+	if (int <= 0) writeUint(buf, 0, 1);
+	else if (int <= 127) writeUint(buf, int, 1);
+	else if (int <= 16_383) writeUint(buf, 128 + (int & 63), 1), writeUint(buf, int >>> 6, 1);
+	else writeUint(buf, 192 + (int & 63), 1), writeUint(buf, int >>> 6, 1), writeUint(buf, int >>> 14, 2);
 };
 const readVarInt = buf => {
-	let val = readUint(buf, 1);
+	const val = readUint(buf, 1);
 	if (val < 128) return val;
-	buf.offset--; val = readUint(buf, 2);
-	if (!(val & 0b1000_0000_0000_0000)) return (val & 0b111_1111) | (val & 0b111_1111_0000_0000) >> 1;
-	buf.offset -= 2; val = readUint(buf, 4);
-	return (val & 0b111_1111) | (val & 0b111_1111_0000_0000) >> 1 | (val & 0b1111_1111_1111_1111_0000_0000_0000_0000) >>> 2;
+	if (val < 192) return (val - 128) + (readUint(buf, 1) << 6);
+	return (val - 192) + (readUint(buf, 1) << 6) + (readUint(buf, 2) << 14);
 };
 const writeString = (buf, str) => {
 	const uint8array = textEncoder.encode(str);
