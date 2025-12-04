@@ -57,6 +57,7 @@ const types = {
 		encode: (schema, buf, data = []) => {
 			if (!schema.length) writeVarInt(buf, data.length);
 			if (schema.packSizeBits) {
+				var pack = 0;
 				data.forEach((d, i) => {
 					pack <<= schema.packSizeBits;
 					pack += d;
