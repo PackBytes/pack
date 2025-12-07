@@ -1,4 +1,6 @@
-import { bool, bits, varint, string, array, float, blob, selectOne, selectMany, PackBytes } from './pack.mjs';
+import p from './pack.mjs';
+const { bool, bits, float, varint, string, blob, date, array, selectOne, selectMany, Pack } = p;
+
 export const logs = [];
 const log = (...msg) => console.log(...msg) || logs.push(msg);
 
@@ -43,7 +45,7 @@ let fail;
 tests.forEach((t, i) => {
 	if (fail) return;
 	const json = JSON.stringify(t.schema);
-	const { encode, decode } = PackBytes(json);
+	const { encode, decode } = Pack(json);
 	log('');
 	log('TEST', i + 1);
 	log('schema:', json);

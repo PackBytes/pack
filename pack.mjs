@@ -1,4 +1,4 @@
-export const PackBytes = (schema, bufferSize = 4096) => {
+const Pack = (schema, bufferSize = 4096) => {
 	initialize(schema = parse(schema));
 	const buf = setEncodeBuffer(new ArrayBuffer(bufferSize));
 	return {
@@ -370,5 +370,4 @@ const genType = _type => {
 	return fn;
 };
 
-export const [ bool, bits, float, varint, string, blob, date, array, selectOne, selectMany ] =
-	[ 'bool', 'bits', 'float', 'varint', 'string', 'blob', 'date', 'array', 'selectOne', 'selectMany' ].map(genType);
+export default Object.keys(types).reduce((o, t) => (o[t] = genType(t), o), { Pack });
