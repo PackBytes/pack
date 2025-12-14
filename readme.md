@@ -4,6 +4,8 @@
 - Create the smallest possible encoding for a given Schema
 - Send compact data to browser clients - 5x to 50x smaller than JSON
 
+<img width="1215" height="403" alt="packbytes" src="https://github.com/user-attachments/assets/f55bfa29-3a46-4a3c-a260-e1023c969c8f" />
+
 # API
 
 ```js
@@ -41,4 +43,5 @@ buf = encode(data)
 // Decode data from buffer, returns original data:
 data = decode(buf)
 ```
+
  
