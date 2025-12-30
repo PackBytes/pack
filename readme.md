@@ -6,10 +6,14 @@
 
 <img width="1215" height="403" alt="packbytes" src="https://github.com/user-attachments/assets/f55bfa29-3a46-4a3c-a260-e1023c969c8f" />
 
+# Install
+
+`npm i PackBytes/pack`
+
 # API
 
 ```js
-import p from './pack.mjs';
+import p from 'pack';
 
 const { bool, bits, float, varint, string, blob, date, array, selectOne, selectMany, Pack } = p;
 
