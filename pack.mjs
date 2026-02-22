@@ -222,7 +222,10 @@ const writeVarInt = (buf, int = 0) => {
 	if (int <= 0) writeUint(buf, 0, 1);
 	else if (int <= 127) writeUint(buf, int, 1);
 	else if (int <= 16_383) writeUint(buf, 128 + (int & 63), 1), writeUint(buf, int >>> 6, 1);
-	else writeUint(buf, 192 + (int & 63), 1), writeUint(buf, int >>> 6, 1), writeUint(buf, int >>> 14, 2);
+	else {
+		if (int > 1073741823) throw Error(`writeVarInt "${int}" exceeds max 1073741823`);
+		writeUint(buf, 192 + (int & 63), 1), writeUint(buf, int >>> 6, 1), writeUint(buf, int >>> 14, 2);
+	}
 };
 const readVarInt = buf => {
 	const val = readUint(buf, 1);
@@ -231,6 +234,7 @@ const readVarInt = buf => {
 	return (val - 192) + (readUint(buf, 1) << 6) + (readUint(buf, 2) << 14);
 };
 const writeString = (buf, str) => {
+	if (!str) return writeUint(buf, 0, 1);
 	const uint8array = textEncoder.encode(str);
 	writeVarInt(buf, uint8array.length);
 	checkSize(buf, uint8array.length);
@@ -244,18 +248,19 @@ const readString = buf => {
 	return str;
 };
 const writeBlob = (buf, blob, bytes) => { // blob = Buffer, TypedArray, or ArrayBuffer
-	if (blob.byteLength === undefined) blob = defaultBlob;
+	if (!bytes && !blob?.byteLength) return writeUint(buf, 0, 1);
 	if (!blob.buffer) blob = new Uint8Array(blob); // blob was ArrayBuffer
-	const length = bytes || blob.byteLength;
-	if (!bytes) writeVarInt(buf, length);
+	else if (blob.BYTES_PER_ELEMENT != 1) blob = new Uint8Array(blob.buffer, blob.byteOffset, blob.byteLength);
+	const length = bytes ?? blob.byteLength;
+	bytes ?? writeVarInt(buf, length);
 	checkSize(buf, length);
-	if (blob.byteLength > length) blob = new Uint8Array(blob.buffer, blob.byteOffset, length);
 	if (blob.byteLength < length) buf.encodeUA.fill(0, buf.offset + blob.byteLength, buf.offset + length);
+	else if (blob.byteLength > length) blob = new Uint8Array(blob.buffer, blob.byteOffset, length);
 	buf.encodeUA.set(blob, buf.offset);
 	buf.offset += length;
 };
 const readBlob = (buf, bytes) => {
-	const length = bytes || readVarInt(buf);
+	const length = bytes == undefined ? readVarInt(buf) : bytes;
 	const blob = buf.decodeUA.subarray(buf.offset, buf.offset + length);
 	buf.offset += length;
 	return blob;
