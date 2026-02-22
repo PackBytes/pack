@@ -13,7 +13,7 @@ const Pack = (schema, bufferSize = 4096) => {
 
 const types = {
 	bool: {
-		encode: (schema, buf, data = 0) => writeUint(buf, data, 1),
+		encode: (schema, buf, data) => writeUint(buf, data, 1),
 		decode: (schema, buf) => Boolean(readUint(buf, 1)),
 		init: schema => {
 			schema.bits = 1; // schemas with "bits" field get packed into 32 bit spaces by packInts() if schema is child of object, skipping encode/decode fn
@@ -21,7 +21,7 @@ const types = {
 		},
 	},
 	bits: {
-		encode: (schema, buf, data = 0) => writeUint(buf, data, schema.bytes),
+		encode: (schema, buf, data) => writeUint(buf, data, schema.bytes),
 		decode: (schema, buf) => readUint(buf, schema.bytes),
 		init: schema => {
 			if (!(schema.val >= 1 && schema.val <= 32)) throw TypeError(`bit size must be 1 to 32, got "${schema.val}"`);
@@ -30,7 +30,7 @@ const types = {
 		},
 	},
 	float: {
-		encode: (schema, buf, data = 0) => writeFloat(buf, data, schema.bytes),
+		encode: (schema, buf, data) => writeFloat(buf, data, schema.bytes),
 		decode: (schema, buf) => readFloat(buf, schema.bytes),
 		init: schema => {
 			if (schema.val != 16 && schema.val != 32 && schema.val != 64) throw TypeError(`float must be 16, 32, or 64 bits, got "${schema.val}"`);
@@ -38,15 +38,15 @@ const types = {
 		},
 	},
 	varint: {
-		encode: (schema, buf, data = 0) => writeVarInt(buf, data),
+		encode: (schema, buf, data) => writeVarInt(buf, data),
 		decode: (schema, buf) => readVarInt(buf),
 	},
 	string: {
-		encode: (schema, buf, data = '') => writeString(buf, data),
+		encode: (schema, buf, data) => writeString(buf, data),
 		decode: (schema, buf) => readString(buf),
 	},
 	blob: {
-		encode: (schema, buf, data = defaultBlob) => writeBlob(buf, data, schema.val),
+		encode: (schema, buf, data) => writeBlob(buf, data, schema.val),
 		decode: (schema, buf) => readBlob(buf, schema.val),
 	},
 	date: {
@@ -208,7 +208,7 @@ const readUint = (buf, bytes) => {
 	buf.offset += bytes;
 	return int;
 };
-const writeFloat = (buf, val, bytes) => {
+const writeFloat = (buf, val = 0, bytes) => {
 	checkSize(buf, bytes);
 	bytes == 2 ? buf.encodeDV.setFloat16(buf.offset, val, true) :
 	bytes == 4 ? buf.encodeDV.setFloat32(buf.offset, val, true) :
@@ -223,7 +223,7 @@ const readFloat = (buf, bytes) => {
 	buf.offset += bytes;
 	return float;
 };
-const writeVarInt = (buf, int) => {
+const writeVarInt = (buf, int = 0) => {
 	if (int <= 0) writeUint(buf, 0, 1);
 	else if (int <= 127) writeUint(buf, int, 1);
 	else if (int <= 16_383) writeUint(buf, 128 + (int & 63), 1), writeUint(buf, int >>> 6, 1);
@@ -356,11 +356,6 @@ const uint8arrayToHex = uint8 => uint8.reduce((hex, byte) => hex + byte.toString
 const useArrayPacking = s => s.bits && s._type && (s.bits <= 6 || s.bits == 9 || s.bits == 10);
 const fieldName = Symbol('fieldName');
 const pack = Symbol('pack');
-const defaultBlob = new Uint8Array(0);
-const defaultObjectID = { id: new Uint8Array(12) };
-const defaultUUID = { buffer: new Uint8Array(16) };
-const defaultDate = new Date(0);
-const defaultLonlat = [ 0, 0 ];
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 const genType = _type => {
