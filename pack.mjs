@@ -29,6 +29,10 @@ const types = {
 			schema.bytes = schema.bits > 16 ? 4 : schema.bits > 8 ? 2 : 1;
 		},
 	},
+	int32: {
+		encode: (schema, buf, data) => writeInt32(buf, data),
+		decode: (schema, buf) => readInt32(buf),
+	},
 	float: {
 		encode: (schema, buf, data) => writeFloat(buf, data, schema.bytes),
 		decode: (schema, buf) => readFloat(buf, schema.bytes),
@@ -188,6 +192,16 @@ const setDecodeBuffer = b => ({ // b = Buffer, TypedArray, or ArrayBuffer
 	offset: 0,
 });
 
+const writeInt32 = (buf, val) => {
+	checkSize(buf, 4);
+	buf.encodeDV.setInt32(buf.offset, minmax(val, -2147483648, 2147483647));
+	buf.offset += 4;
+};
+const readInt32 = buf => {
+	const int = buf.encodeDV.getInt32(buf.offset);
+	buf.offset += 4;
+	return int;
+};
 const writeUint = (buf, val, bytes) => {
 	checkSize(buf, bytes);
 	bytes == 1 ? buf.encodeDV.setUint8(buf.offset, minmax(val, 0, 255)) :
