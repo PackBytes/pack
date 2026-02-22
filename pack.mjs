@@ -195,31 +195,31 @@ const setDecodeBuffer = b => ({ // b = Buffer, TypedArray, or ArrayBuffer
 
 const writeUint = (buf, val, bytes) => {
 	checkSize(buf, bytes);
-	bytes == 1 ? buf.encodeDV.setUint8(buf.offset, val, true) :
-	bytes == 2 ? buf.encodeDV.setUint16(buf.offset, val, true) :
-		buf.encodeDV.setUint32(buf.offset, val, true);
+	bytes == 1 ? buf.encodeDV.setUint8(buf.offset, minmax(val, 0, 255)) :
+	bytes == 2 ? buf.encodeDV.setUint16(buf.offset, minmax(val, 0, 65535)) :
+		buf.encodeDV.setUint32(buf.offset, minmax(val, 0, 4294967295));
 	buf.offset += bytes;
 };
 const readUint = (buf, bytes) => {
 	const int =
-		bytes == 1 ? buf.decodeDV.getUint8(buf.offset, true) :
-		bytes == 2 ? buf.decodeDV.getUint16(buf.offset, true) :
-			buf.decodeDV.getUint32(buf.offset, true);
+		bytes == 1 ? buf.decodeDV.getUint8(buf.offset) :
+		bytes == 2 ? buf.decodeDV.getUint16(buf.offset) :
+			buf.decodeDV.getUint32(buf.offset);
 	buf.offset += bytes;
 	return int;
 };
 const writeFloat = (buf, val = 0, bytes) => {
 	checkSize(buf, bytes);
-	bytes == 2 ? buf.encodeDV.setFloat16(buf.offset, val, true) :
-	bytes == 4 ? buf.encodeDV.setFloat32(buf.offset, val, true) :
-		buf.encodeDV.setFloat64(buf.offset, val, true);
+	bytes == 2 ? buf.encodeDV.setFloat16(buf.offset, val) :
+	bytes == 4 ? buf.encodeDV.setFloat32(buf.offset, val) :
+		buf.encodeDV.setFloat64(buf.offset, val);
 	buf.offset += bytes;
 };
 const readFloat = (buf, bytes) => {
 	const float =
-		bytes == 2 ? buf.decodeDV.getFloat16(buf.offset, true) :
-		bytes == 4 ? buf.decodeDV.getFloat32(buf.offset, true) :
-			buf.decodeDV.getFloat64(buf.offset, true);
+		bytes == 2 ? buf.decodeDV.getFloat16(buf.offset) :
+		bytes == 4 ? buf.decodeDV.getFloat32(buf.offset) :
+			buf.decodeDV.getFloat64(buf.offset);
 	buf.offset += bytes;
 	return float;
 };
@@ -354,6 +354,7 @@ const bitsToBytes = bits => Math.ceil(bits / 8);
 const newPack = (ints = []) => ({ ints, int8: [], int16: [], int32: [] });
 const uint8arrayToHex = uint8 => uint8.reduce((hex, byte) => hex + byte.toString(16).padStart(2, '0'), '');
 const useArrayPacking = s => s.bits && s._type && (s.bits <= 6 || s.bits == 9 || s.bits == 10);
+const minmax = (val, min, max) => Math.min(max, Math.max(min, val));
 const fieldName = Symbol('fieldName');
 const pack = Symbol('pack');
 const textEncoder = new TextEncoder();
