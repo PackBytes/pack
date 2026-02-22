@@ -49,10 +49,6 @@ const types = {
 		encode: (schema, buf, data) => writeBlob(buf, data, schema.val),
 		decode: (schema, buf) => readBlob(buf, schema.val),
 	},
-	date: {
-		encode: (schema, buf, data = defaultDate) => writeFloat(buf, data.getTime(), schema.val == 32 ? 4 : 8),
-		decode: (schema, buf) => new Date(readFloat(buf, schema.val == 32 ? 4 : 8)),
-	},
 	array: {
 		encode: (schema, buf, data = []) => {
 			if (!schema.length) writeVarInt(buf, data.length);
