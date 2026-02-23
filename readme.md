@@ -20,7 +20,7 @@ const { bool, bits, float, varint, string, blob, date, array, selectOne, selectM
 // All available data types:
 type = bool // true or false
 type = bits(x) // x = number of bits 1-32 for unsigned integer, max int = 2**x - 1
-type = float(x) // x = 16, 32, or 64 bit floating point number
+type = float(x) // x = 16, 32, or 64 bits for floating point number
 type = varint // variable length integer, max int = 1_073_741_823
 type = string // string, max length = 1_073_741_823
 type = blob // buffer, max length = 1_073_741_823
