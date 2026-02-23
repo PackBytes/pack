@@ -15,7 +15,7 @@
 ```js
 import p from 'pack';
 
-const { bool, bits, float, varint, string, blob, date, array, selectOne, selectMany, Pack } = p;
+const { bool, bits, float, varint, string, blob, array, selectOne, selectMany, Pack } = p;
 
 // All available data types:
 type = bool // true or false
@@ -24,7 +24,7 @@ type = float(x) // x = 16, 32, or 64 bits for floating point number
 type = varint // variable length integer, max int = 1_073_741_823
 type = string // string, max length = 1_073_741_823
 type = blob // buffer, max length = 1_073_741_823
-type = blob(x) // specific byte size buffer 
+type = blob(size) // specific byte size buffer 
 type = array(type) // array of any type, max length = 1_073_741_823
 type = array(type, length) // specific length array
 type = selectOne({ field1: type, field2: type, .. }) // object with a single active field
